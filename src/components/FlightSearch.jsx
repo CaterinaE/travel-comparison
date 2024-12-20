@@ -1,53 +1,43 @@
-import React, { useState } from 'react';
-import { searchFlights } from '../api/flightAPI';
+const axios = require('axios');
 
-const FlightSearch = () => {
-  const [origin, setOrigin] = useState('');
-  const [destination, setDestination] = useState('');
-  const [departureDate, setDepartureDate] = useState('');
-  const [flights, setFlights] = useState([]);
-
-  const handleSearch = async () => {
-    const results = await searchFlights(origin, destination, departureDate);
-    setFlights(results || []);
+const searchFlights = async () => {
+  const url = "https://sky-scanner3.p.rapidapi.com/flights/search-multi-city";
+  const headers = {
+    "x-rapidapi-key": "8fe764d300mshbb40fea542dafb4p11ace8jsn712739cdfaf4",
+    "x-rapidapi-host": "sky-scanner3.p.rapidapi.com",
+    "Content-Type": "application/json"
+  };
+  const data = {
+    market: "US",
+    locale: "en-US",
+    currency: "USD",
+    adults: 1,
+    children: 0,
+    infants: 0,
+    cabinClass: "economy",
+    stops: ["direct", "1stop", "2stops"],
+    sort: "cheapest_first",
+    airlines: [-32753, -32695],
+    flights: [
+      {
+        fromEntityId: "LHR",
+        toEntityId: "DUB",
+        departDate: "2024-12-22"
+      },
+      {
+        fromEntityId: "PARI",
+        toEntityId: "MSYA",
+        departDate: "2024-12-28"
+      }
+    ]
   };
 
-
- 
-
-  
-  return (
-    <div>
-      <h2>Search Flights</h2>
-      <input
-        type="text"
-        placeholder="Origin (e.g., LHR)"
-        value={origin}
-        onChange={(e) => setOrigin(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Destination (e.g., JFK)"
-        value={destination}
-        onChange={(e) => setDestination(e.target.value)}
-      />
-      <input
-        type="date"
-        value={departureDate}
-        onChange={(e) => setDepartureDate(e.target.value)}
-      />
-      <button onClick={handleSearch}>Search</button>
-      <ul>
-        {flights.map((flight, index) => (
-          <li key={index}>
-            {flight.itineraries[0].segments[0].departure.iataCode} →{' '}
-            {flight.itineraries[0].segments[0].arrival.iataCode}: £
-            {flight.price.total}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+  try {
+    const response = await axios.post(url, data, { headers });
+    console.log(response.data); // Process the API response
+  } catch (error) {
+    console.error("Error fetching flight data:", error.message);
+  }
 };
 
-export default FlightSearch;
+searchFlights();
